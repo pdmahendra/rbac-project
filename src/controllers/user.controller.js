@@ -1,6 +1,8 @@
 const profile = async (req, res) => {
     // res.send("User Profile")
-    res.render('profile')
+    // console.log(req.user)
+    const person = req.user
+    res.render('profile', { person })
 }
 
 export { profile }
