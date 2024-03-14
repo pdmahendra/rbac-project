@@ -1,5 +1,4 @@
 import User from '../models/user.model.js';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const users = User
@@ -23,7 +22,9 @@ const login = async (req, res) => {
 
     const user = await users.findOne({ email: email });
     if (!user) {
-        return res.status(400).json({ message: "User with this Email does not exist" })
+        // return res.status(409).json({ message: `User with email ${email} already exists` });
+        res.redirect('/auth/login');
+        return;
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password)
@@ -51,8 +52,8 @@ const login = async (req, res) => {
     return res
         .status(200)
         .cookie("accessToken", token, options)
-        .json({ message: "User logged In Successfully", user: loggedInUser },
-        )
+        .redirect('/user/profile')
+        // .send({ message: "User logged In Successfully", user: loggedInUser })
 }
 
 const register = async (req, res) => {
@@ -60,12 +61,13 @@ const register = async (req, res) => {
     const { email, password } = req.body
 
     if (!(email && password)) {
-        return res.status(400).json({ message: "All fields are required" });
+        // return res.status(400).json({ message: "All fields are required" }).redirect('/auth/register');
+        return res.redirect('/auth/register');
     }
 
     const existingUser = await users.findOne({ email });
     if (existingUser) {
-        return res.status(409).json({ message: `User with email ${email} already exists` });
+       return res.redirect('/auth/register');
     }
 
     const user = await users.create({
@@ -74,10 +76,11 @@ const register = async (req, res) => {
     })
 
     if (!user) {
-        return res.status(500).json({ message: "User Registration failed" });
+        return res.redirect('/auth/register');
     }
-
-    return res.status(201).json({ message: "User registered successfully", user });
+    console.log(`user registered successfully ${user}`)
+      res.redirect('/auth/login');
+    // return res.status(201).json({ message: "User registered successfully", user });
     // res.render('register', {
     //     email: req.body.email,
     //     // messages: req.flash(),
@@ -86,7 +89,9 @@ const register = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-    res.send("logout")
+    // res.send("logout")
+    res.clearCookie('accessToken');
+    res.redirect('/auth/login')
 }
 
 export {
