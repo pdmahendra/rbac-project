@@ -12,15 +12,14 @@ app.use(cookieParser())
 app.use((req, res, next) => {
     res.locals.user = req.user;
     next();
-  });
+});
 
-app.get('/', (req, res) => {
-res.render('index')
-})
 
+import index from './routes/index.route.js'
 import authRoute from './routes/auth.route.js'
 import userRoute from './routes/user.route.js'
 
+app.use('/', index)
 app.use('/auth', authRoute)
 app.use('/user', userRoute)
 
