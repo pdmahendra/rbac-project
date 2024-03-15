@@ -16,7 +16,6 @@ export const verifyJwt = async (req, res, next) => {
         if (error.message === 'jwt expired') {
             res.clearCookie('accessToken');
             res.redirect('/auth/login')
-            // return res.redirect('/auth/login')
         }
     }
 }
