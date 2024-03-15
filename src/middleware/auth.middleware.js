@@ -1,13 +1,22 @@
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 
-export const verifyJwt = async (req,res,next) => {
-    const token = req.cookies.accessToken || req.header('Authorization').split('Bearer ')[1];
-    if (!token) {
-        return res.status(401).json({ message: "Unauthorized request" });
+export const verifyJwt = async (req, res, next) => {
+    const token = req.cookies.accessToken || (req.headers.authorization && req.headers.authorization.split("Bearer ")[1]);
+    if(!token){
+        return res.redirect('/auth/login')
     }
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const user = await User.findById(decodedToken?.id);
+    res.locals.user = user
     req.user = user
     next()
+}
+
+export const ensureLoggedout = async (req, res, next) => {
+if(!req.cookies.accessToken){
+    next()
+}else{
+    return res.redirect('/user/profile')
+}
 }
